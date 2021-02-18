@@ -74,6 +74,7 @@ name = "bazingabot"
 version = "0.1.0"
 dependencies = [
  "dotenv",
+ "rand 0.8.3",
  "regex",
  "reqwest",
  "serenity",

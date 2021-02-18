@@ -13,7 +13,7 @@ use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-use commands::{math::*, meta::*, owner::*};
+use commands::{apina::*, math::*, meta::*, owner::*};
 
 pub struct ShardManagerContainer;
 
@@ -35,7 +35,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(multiply, ping, quit)]
+#[commands(multiply, ping, quit, apina)]
 struct General;
 
 #[tokio::main]
@@ -71,7 +71,7 @@ async fn main() {
 
     // Create the framework
     let framework = StandardFramework::new()
-        .configure(|c| c.owners(owners).prefix("~"))
+        .configure(|c| c.owners(owners).prefix("!"))
         .group(&GENERAL_GROUP);
 
     let mut client = Client::builder(&token)

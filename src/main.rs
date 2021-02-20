@@ -16,9 +16,15 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 use commands::{apina::*, math::*, meta::*, owner::*, quote::*};
 
 pub struct ShardManagerContainer;
-
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
+}
+
+pub struct ReqwestClientContainer;
+
+impl TypeMapKey for ReqwestClientContainer {
+    // Has Arc internally
+    type Value = reqwest::Client;
 }
 
 struct Handler;
@@ -83,6 +89,7 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+        data.insert::<ReqwestClientContainer>(reqwest::Client::new());
     }
 
     let shard_manager = client.shard_manager.clone();

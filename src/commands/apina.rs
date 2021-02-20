@@ -2,24 +2,27 @@ use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+use crate::ReqwestClientContainer;
+
 #[command]
 async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
-    let origin_url = "https://m.apina.biz/random";
+    let apina_url = "https://m.apina.biz/random";
+    let data = ctx.data.read().await;
 
-    // TODO reuse single client instead
-    // => Init into global data of context
-    match reqwest::get(origin_url).await {
-        Ok(resp) => match resp.text().await {
-            Ok(text) => {
-                if let Some(image_url) = get_image_url(&text) {
-                    msg.channel_id
-                        .say(&ctx.http, format!("{}", &image_url))
-                        .await?;
+    if let Some(client) = data.get::<ReqwestClientContainer>() {
+        match client.get(apina_url).send().await {
+            Ok(resp) => match resp.text().await {
+                Ok(text) => {
+                    if let Some(image_url) = get_image_url(&text) {
+                        msg.channel_id
+                            .say(&ctx.http, format!("{}", &image_url))
+                            .await?;
+                    }
                 }
-            }
-            Err(_) => println!("ERROR reading {}", origin_url),
-        },
-        Err(_) => println!("ERROR downloading {}", origin_url),
+                Err(_) => println!("ERROR reading {}", apina_url),
+            },
+            Err(_) => println!("ERROR downloading {}", apina_url),
+        }
     }
     Ok(())
 }

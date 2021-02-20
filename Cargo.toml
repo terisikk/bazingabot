@@ -12,10 +12,11 @@ tracing = "0.1.23"
 tracing-subscriber = "0.2"
 regex = "1"
 rand = "0.8"
+serde = "1.0"
 
 [dependencies.reqwest]
 version = "0.11"
-features = ["blocking"]
+features = ["blocking", "json"]
 
 [dependencies.tokio]
 version = "1.0"

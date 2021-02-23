@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use serenity::framework::standard::{macros::command, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -11,22 +11,29 @@ use crate::ReqwestClientContainer;
 struct QuoteJson {
     quote: String,
 }
+static NOT_FOUND_REPLY: &str = "???";
 
 #[command]
-async fn quote(ctx: &Context, msg: &Message) -> CommandResult {
-    let quote_url = "https://quotes.teemurisikko.com/api/random_quotes?limit=1";
+async fn quote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let mut query = String::from("https://quotes.teemurisikko.com/api/random_quotes?limit=1");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
     let data = ctx.data.read().await;
+    let arguments = _parse_arguments(args);
+    query += &arguments;
 
     if let Some(client) = data.get::<ReqwestClientContainer>() {
-        match client.get(quote_url).bearer_auth(token).send().await {
+        match client.get(&query).bearer_auth(token).send().await {
             Ok(resp) => match resp.json::<Vec<QuoteJson>>().await {
                 Ok(json) => {
-                    msg.channel_id
-                        .say(&ctx.http, format!("{}", json[0].quote))
-                        .await?;
+                    if (json.len() == 0 || json[0].quote.len() == 0) {
+                        msg.channel_id.say(&ctx.http, NOT_FOUND_REPLY).await?;
+                    } else {
+                        msg.channel_id
+                            .say(&ctx.http, format!("{}", json[0].quote))
+                            .await?;
+                    }
                 }
-                Err(_) => println!("ERROR reading quote from {}", quote_url),
+                Err(_) => println!("ERROR reading quote from {}", query),
             },
             Err(_) => println!("ERROR parsing quote result"),
         }
@@ -35,4 +42,29 @@ async fn quote(ctx: &Context, msg: &Message) -> CommandResult {
             .await?;
     }
     Ok(())
+}
+
+fn _parse_arguments(mut args: Args) -> String {
+    let mut ret = String::new();
+    for arg in args.iter::<String>() {
+        match arg {
+            Ok(arg) => {
+                ret += &_parse_argument(arg);
+            }
+            Err(_arg) => {
+                println!("ERROR: Could not iterate args for rand")
+            }
+        }
+    }
+    return ret;
+}
+
+fn _parse_argument(mut arg: String) -> String {
+    let op = if arg.chars().nth(0) == Some('-') {
+        arg.remove(0);
+        "not.ilike"
+    } else {
+        "ilike"
+    };
+    return format!("&quote={}.*{}*", op, arg).to_string();
 }

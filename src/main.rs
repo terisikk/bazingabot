@@ -83,6 +83,10 @@ async fn main() {
     let mut client = Client::builder(&token)
         .framework(framework)
         .event_handler(Handler)
+        // TODO: semicolon handler
+        // Set a function that's called whenever an attempted command-call's
+        // command could not be found.
+        //        .unrecognised_command(unknown_command)
         .await
         .expect("Err creating client");
 

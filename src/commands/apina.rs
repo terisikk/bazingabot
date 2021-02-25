@@ -27,7 +27,7 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-fn get_image_url(string: &str) -> Option<String> {
+fn _get_image_url(string: &str) -> Option<String> {
     use regex::Regex;
     let re = Regex::new(r"(https://images.apina.biz/full/)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,4}(/\S*)?")
         .unwrap();
@@ -39,4 +39,29 @@ fn get_image_url(string: &str) -> Option<String> {
     }
 
     return None;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // TODO test apina query itself?
+    // -> it's possible to mock the http via mockito
+    // -> it's possible to store trait into ReqwestClientContainer instead of actual client
+    // .. however, how to take control of the Message and set expectations?
+
+    #[test]
+    fn test_get_image_url_parse() {
+        let expected = "https://images.apina.biz/full/12345.jpg";
+        let content =
+            "asd lol <img> header// ding\\ dong/\tp </img>https://images.apina.biz/full/12345.jpg *.jpg";
+        assert_eq!(expected, _get_image_url(content).unwrap());
+    }
+
+    #[test]
+    fn test_get_image_url_malformed_parse() {
+        let content =
+            "asd lol <img> header// ding\\ dong/\tp htt://images.apina.biz/full/12345.jpg *.jpg";
+        assert_eq!(None, _get_image_url(content));
+    }
 }

@@ -13,7 +13,7 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
         match client.get(apina_url).send().await {
             Ok(resp) => match resp.text().await {
                 Ok(text) => {
-                    if let Some(image_url) = get_image_url(&text) {
+                    if let Some(image_url) = _get_image_url(&text) {
                         msg.channel_id
                             .say(&ctx.http, format!("{}", &image_url))
                             .await?;

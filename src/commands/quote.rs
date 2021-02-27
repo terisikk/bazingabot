@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult, Delimiter};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -17,15 +17,15 @@ static NOT_FOUND_REPLY: &str = "???";
 async fn quote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut query = String::from("https://quotes.teemurisikko.com/api/random_quotes?limit=1");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
-    let data = ctx.data.read().await;
     let arguments = _parse_arguments(args);
     query += &arguments;
 
+    let data = ctx.data.read().await;
     if let Some(client) = data.get::<ReqwestClientContainer>() {
         match client.get(&query).bearer_auth(token).send().await {
             Ok(resp) => match resp.json::<Vec<QuoteJson>>().await {
                 Ok(json) => {
-                    if (json.len() == 0 || json[0].quote.len() == 0) {
+                    if json.len() == 0 || json[0].quote.len() == 0 {
                         msg.channel_id.say(&ctx.http, NOT_FOUND_REPLY).await?;
                     } else {
                         msg.channel_id
@@ -41,6 +41,12 @@ async fn quote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         msg.reply(ctx, "There was a problem getting the reqwest client")
             .await?;
     }
+    Ok(())
+}
+
+pub async fn quote_semicolon(ctx: &Context, msg: &Message) -> CommandResult {
+    let dummy_args = Args::new("", &[Delimiter::Single(' ')]);
+    quote(ctx, msg, dummy_args).await?;
     Ok(())
 }
 

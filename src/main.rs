@@ -3,9 +3,12 @@ mod commands;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
-    framework::{standard::macros::group, StandardFramework},
+    framework::{
+        standard::macros::{group, hook},
+        StandardFramework,
+    },
     http::Http,
-    model::{event::ResumedEvent, gateway::Ready},
+    model::{channel::Message, event::ResumedEvent, gateway::Ready},
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
@@ -78,15 +81,12 @@ async fn main() {
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| c.owners(owners).prefix("!"))
-        .group(&GENERAL_GROUP);
+        .group(&GENERAL_GROUP)
+        .normal_message(normal_message);
 
     let mut client = Client::builder(&token)
         .framework(framework)
         .event_handler(Handler)
-        // TODO: semicolon handler
-        // Set a function that's called whenever an attempted command-call's
-        // command could not be found.
-        //        .unrecognised_command(unknown_command)
         .await
         .expect("Err creating client");
 
@@ -107,5 +107,12 @@ async fn main() {
 
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
+    }
+}
+
+#[hook]
+async fn normal_message(_ctx: &Context, msg: &Message) {
+    if msg.content.chars().last() == Some(':') {
+        commands::quote::quote_semicolon(_ctx, msg).await;
     }
 }

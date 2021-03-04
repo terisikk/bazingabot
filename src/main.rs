@@ -113,6 +113,8 @@ async fn main() {
 #[hook]
 async fn normal_message(_ctx: &Context, msg: &Message) {
     if msg.content.chars().last() == Some(':') {
-        commands::quote::quote_semicolon(_ctx, msg).await;
+        commands::quote::quote_semicolon(_ctx, msg)
+            .await
+            .expect("Could not fetch quote");
     }
 }

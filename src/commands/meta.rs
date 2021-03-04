@@ -4,13 +4,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    msg.channel_id.say(&ctx.http, "Pong!").await?;
-
-    Ok(())
-}
-
-#[command]
 pub async fn rand(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut vec = Vec::new();
     for arg in args.iter::<String>() {

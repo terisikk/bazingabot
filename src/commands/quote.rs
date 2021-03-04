@@ -14,7 +14,7 @@ struct QuoteJson {
 static NOT_FOUND_REPLY: &str = "???";
 
 #[command]
-async fn quote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn quote(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut query = String::from("https://quotes.teemurisikko.com/api/random_quotes?limit=1");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
     let arguments = _parse_arguments(args);

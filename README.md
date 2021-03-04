@@ -8,3 +8,4 @@ Discord bot for community of irl friends
 - execute _cargo build_ in root to build debug
   - Optionally  build _cargo build release_ for release
 - run target/release/bazingabot
+- invite BazingaBot to your channel (TODO howto)

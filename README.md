@@ -3,7 +3,7 @@ Discord bot for community of irl friends
 
 # Instructions
 
-- Install rust copmiler (https://www.rust-lang.org/tools/install)
+- Install rust compiler (https://www.rust-lang.org/tools/install)
 - Checkout main branch
 - execute _cargo build release_ in the root directory in order to build release
   - Optionally  build _cargo build_ for debug

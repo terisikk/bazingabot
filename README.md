@@ -1,5 +1,5 @@
 # bazingabot
-Discord bot for community of irl friends
+Discord bot for community of irl friends. First attempt with rust language.
 
 # Instructions
 

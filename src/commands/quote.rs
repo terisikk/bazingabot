@@ -35,7 +35,7 @@ async fn quote(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 }
                 Err(_) => println!("ERROR reading quote from {}", query),
             },
-            Err(_) => println!("ERROR parsing quote result"),
+            Err(e) => println!("ERROR parsing quote result: {}", e),
         }
     } else {
         msg.reply(ctx, "There was a problem getting the reqwest client")

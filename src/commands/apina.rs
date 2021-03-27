@@ -29,8 +29,9 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
 
 fn _get_image_url(string: &str) -> Option<String> {
     use regex::Regex;
-    let re = Regex::new(r"(https://images.apina.biz/full/)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,4}(/\S*)?")
-        .unwrap();
+    let re =
+        Regex::new(r"(https://images.apina.biz/full/)[a-zA-Z0-9\-\.]+\.[a-zA-Z3-4_.-]{2,4}(/\S*)?")
+            .unwrap();
     if let Some(url) = re.captures(string) {
         if url.len() == 0 {
             return None;
@@ -55,6 +56,14 @@ mod tests {
         let expected = "https://images.apina.biz/full/12345.jpg";
         let content =
             "asd lol <img> header// ding\\ dong/\tp </img>https://images.apina.biz/full/12345.jpg *.jpg";
+        assert_eq!(expected, _get_image_url(content).unwrap());
+    }
+
+    #[test]
+    fn test_get_image_url_parse_mp4() {
+        let expected = "https://images.apina.biz/full/12345.mp4";
+        let content =
+            "asd lol <img> header// ding\\ dong/\tp jpg </img>https://images.apina.biz/full/12345.mp4 asd njdkf *.jpg";
         assert_eq!(expected, _get_image_url(content).unwrap());
     }
 

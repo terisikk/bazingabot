@@ -44,7 +44,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(quit, apina, rand, quote, masteries)]
+#[commands(quit, apina, rand, quote, masteries, f2p)]
 struct General;
 
 #[tokio::main]

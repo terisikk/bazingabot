@@ -4,12 +4,11 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::env;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 #[command]
 async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     debug!("masteries requested");
-    // Create RiotApi instance from key string.
     let api_key = env::var("RIOTAPI_TOKEN").expect("Expected a token  for riot api");
     let riot_api = RiotApi::with_key(api_key);
 
@@ -24,7 +23,7 @@ async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
     let mastery_count = _parse_mastery_count(&mut args);
 
     // Get summoner data.
-    let _summoner = match riot_api
+    let _ = match riot_api
         .summoner_v4()
         .get_by_summoner_name(Region::EUNE, &summoner_name.clone().unwrap())
         .await?
@@ -65,6 +64,37 @@ async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
                         summoner_name.clone().unwrap()
                     ),
                 )
+                .await?;
+        }
+    };
+
+    Ok(())
+}
+
+#[command]
+async fn f2p(ctx: &Context, msg: &Message) -> CommandResult {
+    debug!("masteries requested");
+    let api_key = env::var("RIOTAPI_TOKEN").expect("Expected a token  for riot api");
+    let riot_api = RiotApi::with_key(api_key);
+
+    // Get summoner data.
+    let _ = match riot_api.champion_v3().get_champion_info(Region::EUNE).await {
+        Ok(champion_info) => {
+            let ids = champion_info.free_champion_ids;
+            let mut res = "".to_string();
+
+            for (_, champ) in ids.iter().enumerate() {
+                res.push_str(&format!("{}, ", champ.to_string()));
+            }
+            // Maybe not the most idiomatic way -> learn & fix
+            res.pop();
+            res.pop();
+            msg.channel_id.say(&ctx.http, res).await?;
+        }
+        Err(e) => {
+            warn!("Champion info not found from eune: {}", e);
+            msg.channel_id
+                .say(&ctx.http, format!("Could not find champion info"))
                 .await?;
         }
     };

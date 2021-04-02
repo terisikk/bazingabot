@@ -4,9 +4,11 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::env;
+use tracing::{debug, info};
 
 #[command]
 async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    debug!("masteries requested");
     // Create RiotApi instance from key string.
     let api_key = env::var("RIOTAPI_TOKEN").expect("Expected a token  for riot api");
     let riot_api = RiotApi::with_key(api_key);
@@ -16,21 +18,18 @@ async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
         msg.channel_id
             .say(&ctx.http, format!("Summoner name?"))
             .await?;
+        info!("summoner name missing from mastery query");
         return Ok(());
     }
     let mastery_count = _parse_mastery_count(&mut args);
 
     // Get summoner data.
-    // TODO msg if expect fails
     let _summoner = match riot_api
         .summoner_v4()
         .get_by_summoner_name(Region::EUNE, &summoner_name.clone().unwrap())
         .await?
     {
         Some(summoner) => {
-            // Print summoner name.
-            println!("{} Champion Masteries:", summoner.name);
-
             // Get champion mastery data.
             let masteries = riot_api
                 .champion_mastery_v4()
@@ -54,6 +53,10 @@ async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
             msg.channel_id.say(&ctx.http, res).await?;
         }
         None => {
+            info!(
+                "Summoner {} not found from eune",
+                summoner_name.clone().unwrap()
+            );
             msg.channel_id
                 .say(
                     &ctx.http,

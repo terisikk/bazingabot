@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serenity::framework::standard::{macros::command, Args, CommandResult, Delimiter};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use tracing::{debug, error};
 
 use std::env;
 
@@ -15,9 +16,11 @@ static NOT_FOUND_REPLY: &str = "???";
 
 #[command]
 async fn quote(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    debug!("quote requested");
     let mut query = String::from("https://quotes.teemurisikko.com/api/random_quotes?limit=1");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
     let arguments = _parse_arguments(args);
+    debug!("Quote arguments {}", arguments);
     query += &arguments;
 
     let data = ctx.data.read().await;
@@ -33,9 +36,9 @@ async fn quote(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                             .await?;
                     }
                 }
-                Err(_) => println!("ERROR reading quote from {}", query),
+                Err(e) => error!("ERROR reading quote from {}, error: {}", query, e),
             },
-            Err(e) => println!("ERROR parsing quote result: {}", e),
+            Err(e) => error!("ERROR parsing quote result, error: {}", e),
         }
     } else {
         msg.reply(ctx, "There was a problem getting the reqwest client")
@@ -58,7 +61,7 @@ fn _parse_arguments(mut args: Args) -> String {
                 ret += &_parse_argument(arg);
             }
             Err(_arg) => {
-                println!("ERROR: Could not iterate args for rand")
+                error!("ERROR: Could not iterate args for rand")
             }
         }
     }

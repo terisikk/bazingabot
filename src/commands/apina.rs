@@ -1,11 +1,13 @@
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use tracing::{debug, error, warn};
 
 use crate::ReqwestClientContainer;
 
 #[command]
 async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
+    debug!("apina requested");
     let apina_url = "https://m.apina.biz/random";
     let data = ctx.data.read().await;
 
@@ -19,9 +21,9 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
                             .await?;
                     }
                 }
-                Err(_) => println!("ERROR reading {}", apina_url),
+                Err(e) => error!("ERROR reading {}: {}", apina_url, e),
             },
-            Err(_) => println!("ERROR downloading {}", apina_url),
+            Err(e) => error!("ERROR downloading {}: {}", apina_url, e),
         }
     }
     Ok(())
@@ -34,11 +36,13 @@ fn _get_image_url(string: &str) -> Option<String> {
             .unwrap();
     if let Some(url) = re.captures(string) {
         if url.len() == 0 {
+            warn!("apina image url empty");
             return None;
         }
+        debug!("Found apina image url: {}", &url[0]);
         return Some(url[0].to_string());
     }
-
+    warn!("apina image url not found");
     return None;
 }
 

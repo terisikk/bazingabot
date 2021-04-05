@@ -73,7 +73,7 @@ async fn masteries(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
 
 #[command]
 async fn f2p(ctx: &Context, msg: &Message) -> CommandResult {
-    debug!("masteries requested");
+    debug!("f2p champions requested");
     let api_key = env::var("RIOTAPI_TOKEN").expect("Expected a token  for riot api");
     let riot_api = RiotApi::with_key(api_key);
 
@@ -81,7 +81,7 @@ async fn f2p(ctx: &Context, msg: &Message) -> CommandResult {
     let _ = match riot_api.champion_v3().get_champion_info(Region::EUNE).await {
         Ok(champion_info) => {
             let ids = champion_info.free_champion_ids;
-            let mut res = "".to_string();
+            let mut res = "EUNE free champion rotation: ".to_string();
 
             for (_, champ) in ids.iter().enumerate() {
                 res.push_str(&format!("{}, ", champ.to_string()));

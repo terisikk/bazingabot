@@ -24,6 +24,7 @@ First release of bazingabot
 - !f2p command for sample riot api usage
 - !rand command for rand choice among provided arguments
 - !quote command for random quote from the database
+- !masteries command for printing masteries for the given summoner name in EUNE
  
 ### Changed
   

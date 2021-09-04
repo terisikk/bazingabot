@@ -12,7 +12,7 @@ const LINE_ENDING: &'static str = "\r\n";
 #[cfg(not(windows))]
 const LINE_ENDING: &'static str = "\n";
 
-// TODO extract to file if the set is extended
+// TODO extract to file if this set is ever extended
 const LOLCALL: &'static [&'static str] = &[
     "NONNIIN poijat, NYT MENNÄÄN LOLLIA :D",
     "LOL TIEM LOL TIEM LOL TIEM",
@@ -49,6 +49,11 @@ const LOLCALL: &'static [&'static str] = &[
     "LOLLIA SAATANA",
     "LOL :D",
     "lolcall lolcall lolcall tissit",
+    "pelaamaan",
+    "pelaamaan nyyyyyt",
+    "TAIKAMETSÄÄN ->",
+    "Muistatteko vielä kun pelasimme lollia ;_;",
+    "Nukkumatti hiljaa turpaan lyö, mutta ensin työ - LOL TIME",
 ];
 
 // TODO: pair with channel in case same bot instance
@@ -69,20 +74,19 @@ pub async fn lolcall(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
     let command_str = command.unwrap();
     match &command_str as &str {
         "help" => {
-            msg.channel_id
-                .say(
-                    &ctx.http,
-                    format!(
-                        "- !lolcall add - register to receive lolcall mentions
+            msg.reply(
+                &ctx.http,
+                format!(
+                    "- !lolcall add - register to receive lolcall mentions
 - !lolcall remove - deregister and disable lolcall mentions
 - !lolcall to mention all registered users and play some lol"
-                    ),
-                )
-                .await?;
+                ),
+            )
+            .await?;
 
             return Ok(());
         }
-        "add" => {
+        "register" | "add" => {
             let add_ret = _add_user(&msg.author.id);
             if add_ret {
                 msg.reply(&ctx.http, format!("Done.")).await?;
@@ -97,18 +101,15 @@ pub async fn lolcall(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
             return Ok(());
         }
         _ => {
-            msg.channel_id
-                .say(
-                    &ctx.http,
-                    format!("Unrecognized argument, see !lolcall help"),
-                )
-                .await?;
+            msg.reply(
+                &ctx.http,
+                format!("Unrecognized argument, see !lolcall help"),
+            )
+            .await?;
 
             return Ok(());
         }
     }
-
-    // TODO remember to write file header when writing new file!
 }
 
 fn _get_user_list_file_path_str() -> String {
@@ -189,7 +190,6 @@ fn _read_user_file(path: &Path) -> Result<Vec<User>, Box<dyn Error>> {
     let mut rdr = csv::Reader::from_path(path)?;
     for result in rdr.deserialize() {
         let user: User = result?;
-        println!("{:?}", user.id);
         vec.push(user);
     }
     return Ok(vec);
@@ -201,6 +201,9 @@ fn _get_user_list(users: &Vec<User>) -> String {
         res.push_str("<@");
         res.push_str(&user.id);
         res.push_str(">, ");
+    }
+    if res.is_empty() {
+        return "".to_string();
     }
     return res[0..res.len() - 2].to_string();
 }
@@ -238,7 +241,79 @@ fn _parse_command(args: &mut Args) -> Option<String> {
     return args.single::<String>().ok();
 }
 
-//#[command]
-//#[owners_only]
-//async fn lolcall_admin(ctx: &Context, msg: &Message) -> CommandResult {
-// .. add/remove nick
+fn _parse_id(input: &str) -> Option<UserId> {
+    if !input.starts_with("<@!") {
+        return None;
+    }
+    let id_string = input[3..input.len() - 1].to_string();
+    let id_u64 = id_string.parse::<u64>();
+    if id_u64.is_err() {
+        return None;
+    }
+    return Some(UserId(id_u64.unwrap()));
+}
+
+fn _reset_user_list() {
+    let file_path_str = _get_user_list_file_path_str();
+    let file_path = Path::new(&file_path_str);
+    _init_user_list_file(file_path);
+}
+
+#[command]
+#[owners_only]
+async fn lolcall_admin(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    debug!("lolcall_admin");
+    let command = _parse_command(&mut args);
+    if command == None {
+        return Ok(());
+    }
+    let id = _parse_command(&mut args);
+    let command_str = command.unwrap();
+    match &command_str as &str {
+        "register" | "add" => {
+            if id == None {
+                msg.reply(&ctx.http, format!("Add who?")).await?;
+                return Ok(());
+            }
+            let user_id = _parse_id(&id.unwrap());
+            if user_id == None {
+                error!("Failed to parse user id at lolcall_admin");
+                return Ok(());
+            }
+            let add_ret = _add_user(&user_id.unwrap());
+            if add_ret {
+                msg.reply(&ctx.http, format!("Done.")).await?;
+            }
+            return Ok(());
+        }
+        "remove" => {
+            if id == None {
+                msg.reply(&ctx.http, format!("Remove who?")).await?;
+                return Ok(());
+            }
+            let user_id = _parse_id(&id.unwrap());
+            if user_id == None {
+                error!("Failed to parse user id at lolcall_admin");
+                return Ok(());
+            }
+            let remove_ret = _remove_user(&user_id.unwrap());
+            if remove_ret {
+                msg.reply(&ctx.http, format!("Done.")).await?;
+            }
+            return Ok(());
+        }
+        "reset" => {
+            _reset_user_list();
+            msg.reply(&ctx.http, format!("User list is now empty, rip"))
+                .await?;
+            return Ok(());
+        }
+        _ => {
+            msg.channel_id
+                .say(&ctx.http, format!("Unrecognized admin argument"))
+                .await?;
+
+            return Ok(());
+        }
+    }
+}

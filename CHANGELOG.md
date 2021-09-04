@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+<<<<<<< HEAD
 ## [0.2.0]] - 2021-9-04
+=======
+## [0.2.0]] - 2021-8-30
+>>>>>>> 633bc1b68144bfc5d656c1be9191ea5558bc3058
 
 ### Added
 

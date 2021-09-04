@@ -5,11 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]] - 2021-8-30
+## [Unreleased]] - 2021-x-x
 
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [0.2.0]] - 2021-8-30
+
+### Added
+
+!lolcall command
+!lolcall_admin command for owner
+
+### Changed
+
+Bot now requires access to filesystem in order to run all commands. New environment variable RUNTIME_PATH can be used to provide the path folder.
 
 ### Fixed
 

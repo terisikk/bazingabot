@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -8,38 +8,45 @@ use std::env;
 
 use crate::ReqwestClientContainer;
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 struct QuoteJson {
     a_channel: String,
     a_victim: String,
     a_adder: String,
     a_quote: String,
 }
-static NOT_FOUND_REPLY: &str = "???";
 
 #[command]
-async fn quotelast(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+async fn quotelast(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     if msg.kind != MessageType::InlineReply {
         msg.reply(ctx, "Quotelast only works with reply").await?;
     };
 
     debug!("quotelast requested");
-    let mut query = String::from("https://quotes.teemurisikko.com/rpc/quotelast");
+    let query = String::from("https://quotes.teemurisikko.com/rpc/quotelast");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
 
+    let msg_ref = &*msg.referenced_message.as_ref().unwrap();
     let quoteobj = QuoteJson {
-        a_channel: msg.referenced_message.channel_id.name(),
-        a_victim: msg.referenced_message.author.name,
-        a_adder: msg.author.name,
-        a_quote: msg.content,
+        a_channel: msg_ref.channel_id.name(&ctx.cache).await.unwrap(),
+        a_victim: msg_ref.author.name.clone(),
+        a_adder: msg.author.name.clone(),
+        a_quote: msg_ref.content.clone(),
     };
 
     let data = ctx.data.read().await;
     if let Some(client) = data.get::<ReqwestClientContainer>() {
-        match client.post(&query).json(&quoteobj).bearer_auth(token).send().await {
-            Ok(resp) => match resp.json::<Vec<QuoteJson>>().await {
-                Err(e) => error!("ERROR quotelasting, {} ", e),
-            },
+        match client
+            .post(&query)
+            .json(&quoteobj)
+            .bearer_auth(token)
+            .send()
+            .await
+        {
+            Ok(resp) => {
+                // TODO just () out in Ok case, reply for debugging purposes
+                msg.reply(ctx, format!("{:?}", resp)).await?;
+            }
             Err(e) => error!("ERROR parsing quotelast result, error: {}", e),
         }
     } else {

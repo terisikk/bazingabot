@@ -16,7 +16,7 @@ use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-use commands::{apina::*, lolcall::*, meta::*, owner::*, quote::*, riot::*};
+use commands::{apina::*, lolcall::*, meta::*, owner::*, quote::*, quotelast::*, riot::*};
 
 pub struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
@@ -44,7 +44,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(quit, apina, rand, quote, masteries, f2p, lolcall, lolcall_admin)]
+#[commands(quit, apina, rand, quote, quotelast, masteries, f2p, lolcall, lolcall_admin)]
 struct General;
 
 #[tokio::main]

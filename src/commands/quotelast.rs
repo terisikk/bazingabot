@@ -23,7 +23,7 @@ async fn quotelast(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     };
 
     debug!("quotelast requested");
-    let query = String::from("https://quotes.teemurisikko.com/rpc/quotelast");
+    let query = String::from("https://quotes.teemurisikko.com/api/rpc/quotelast");
     let token = env::var("QUOTEAPI_TOKEN").expect("Expected a token  for quoteapi");
 
     let msg_ref = &*msg.referenced_message.as_ref().unwrap();
@@ -43,10 +43,7 @@ async fn quotelast(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
             .send()
             .await
         {
-            Ok(resp) => {
-                // TODO just () out in Ok case, reply for debugging purposes
-                msg.reply(ctx, format!("{:?}", resp)).await?;
-            }
+            Ok(_) => (),
             Err(e) => error!("ERROR parsing quotelast result, error: {}", e),
         }
     } else {

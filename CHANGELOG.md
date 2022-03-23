@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]] - 2021-x-x
+## [Unreleased]] - 2022-x-x
 
 ### Added
 
@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-<<<<<<< HEAD
+## [Unreleased]] - 2022-3-23
+
+### Added
+
+!quotelast comamand
+
+### Changed
+
+### Fixed
+
 ## [0.2.0]] - 2021-9-04
-=======
-## [0.2.0]] - 2021-8-30
->>>>>>> 633bc1b68144bfc5d656c1be9191ea5558bc3058
 
 ### Added
 

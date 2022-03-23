@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-!quotelast comamand
+!quotelast command
 
 ### Changed
 

@@ -15,7 +15,6 @@ rand = "0.8"
 serde = "1.0"
 riven = "1.11"
 csv = "1.1"
-openssl = "0.10.68"
 
 [dependencies.reqwest]
 version = "0.11"
@@ -28,3 +27,7 @@ features = ["macros", "signal", "rt-multi-thread"]
 [dependencies.serenity]
 version = "0.10"
 features = ["cache", "framework", "standard_framework", "rustls_backend"]
+
+[dependencies.openssl]
+version = "0.10.68"
+features = ["vendored"]

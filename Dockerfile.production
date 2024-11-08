@@ -1,5 +1,5 @@
 # Build then discard compiler
-FROM rust:1.82-buster AS builder
+FROM rust:1.82-bullseye AS builder
 
 WORKDIR /usr/src/bazingabot
 COPY . . 

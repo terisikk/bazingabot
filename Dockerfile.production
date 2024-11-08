@@ -1,5 +1,5 @@
 # Build then discard compiler
-FROM rust:1.82 AS builder
+FROM rust:1.82-buster AS builder
 
 WORKDIR /usr/src/bazingabot
 COPY . . 
@@ -7,7 +7,7 @@ COPY . .
 RUN cargo install --path .
 
 # Production environment
-FROM debian:bullseye
+FROM debian:bullseye-slim
 
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/bazingabot /usr/src/bazingabot/.env /usr/local/bin/

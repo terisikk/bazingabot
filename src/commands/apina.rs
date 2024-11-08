@@ -1,11 +1,13 @@
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use tracing::{debug, error, warn};
 
 use crate::ReqwestClientContainer;
 
 #[command]
 async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
+    debug!("apina requested");
     let apina_url = "https://m.apina.biz/random";
     let data = ctx.data.read().await;
 
@@ -15,13 +17,13 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
                 Ok(text) => {
                     if let Some(image_url) = _get_image_url(&text) {
                         msg.channel_id
-                            .say(&ctx.http, format!("{}", &image_url))
+                            .say(&ctx.http, format!("|| {} ||", &image_url))
                             .await?;
                     }
                 }
-                Err(_) => println!("ERROR reading {}", apina_url),
+                Err(e) => error!("ERROR reading {}: {}", apina_url, e),
             },
-            Err(_) => println!("ERROR downloading {}", apina_url),
+            Err(e) => error!("ERROR downloading {}: {}", apina_url, e),
         }
     }
     Ok(())
@@ -29,15 +31,18 @@ async fn apina(ctx: &Context, msg: &Message) -> CommandResult {
 
 fn _get_image_url(string: &str) -> Option<String> {
     use regex::Regex;
-    let re = Regex::new(r"(https://images.apina.biz/full/)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,4}(/\S*)?")
-        .unwrap();
+    let re =
+        Regex::new(r"(https://images.apina.biz/full/)[a-zA-Z0-9\-\.]+\.[a-zA-Z3-4_.-]{2,4}(/\S*)?")
+            .unwrap();
     if let Some(url) = re.captures(string) {
         if url.len() == 0 {
+            warn!("apina image url empty");
             return None;
         }
+        debug!("Found apina image url: {}", &url[0]);
         return Some(url[0].to_string());
     }
-
+    warn!("apina image url not found");
     return None;
 }
 
@@ -55,6 +60,14 @@ mod tests {
         let expected = "https://images.apina.biz/full/12345.jpg";
         let content =
             "asd lol <img> header// ding\\ dong/\tp </img>https://images.apina.biz/full/12345.jpg *.jpg";
+        assert_eq!(expected, _get_image_url(content).unwrap());
+    }
+
+    #[test]
+    fn test_get_image_url_parse_mp4() {
+        let expected = "https://images.apina.biz/full/12345.mp4";
+        let content =
+            "asd lol <img> header// ding\\ dong/\tp jpg </img>https://images.apina.biz/full/12345.mp4 asd njdkf *.jpg";
         assert_eq!(expected, _get_image_url(content).unwrap());
     }
 

@@ -2,17 +2,19 @@ use rand::seq::SliceRandom;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use tracing::{debug, error};
 
 #[command]
 pub async fn rand(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut vec = Vec::new();
+    debug!("rand requested");
     for arg in args.iter::<String>() {
         match arg {
             Ok(arg) => {
                 vec.push(arg);
             }
             Err(_arg) => {
-                println!("ERROR: Could not iterate args for rand")
+                error!("ERROR: Could not iterate args for rand")
             }
         }
     }

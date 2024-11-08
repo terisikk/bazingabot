@@ -1,5 +1,5 @@
 # Build then discard compiler
-FROM rust:1.59 as builder
+FROM rust:1.63 as builder
 
 WORKDIR /usr/src/bazingabot
 COPY . . 
@@ -13,4 +13,3 @@ RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /v
 COPY --from=builder /usr/local/cargo/bin/bazingabot /usr/src/bazingabot/.env /usr/local/bin/
 
 CMD cd /usr/local/bin && /usr/local/bin/bazingabot
-
